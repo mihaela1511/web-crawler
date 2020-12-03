@@ -1,24 +1,24 @@
-package java.ro.mta.facc.webcrawler;
+package ro.mta.facc.webcrawler;
 
-import java.ro.mta.facc.webcrawler.config.WebCrawlerConfig;
-import java.ro.mta.facc.webcrawler.config.extractor.impl.ConfigFileParser;
-import java.ro.mta.facc.webcrawler.config.extractor.impl.FileDimensionArgumentExtractor;
-import java.ro.mta.facc.webcrawler.config.extractor.impl.FileTypeArgumentExtractor;
-import java.ro.mta.facc.webcrawler.config.extractor.impl.KeywordArgumentExtractor;
-import java.ro.mta.facc.webcrawler.download.FileDownloader;
-import java.ro.mta.facc.webcrawler.download.FileDownloaderImpl;
-import java.ro.mta.facc.webcrawler.filter.FileDimensionFilter;
-import java.ro.mta.facc.webcrawler.filter.FileTypeFilter;
-import java.ro.mta.facc.webcrawler.filter.KeywordFilter;
-import java.ro.mta.facc.webcrawler.parse.LinkExtractor;
-import java.ro.mta.facc.webcrawler.parse.LinkExtractorImpl;
+import ro.mta.facc.webcrawler.config.WebCrawlerConfig;
+import ro.mta.facc.webcrawler.config.extractor.impl.ConfigFileParser;
+import ro.mta.facc.webcrawler.config.extractor.impl.FileDimensionArgumentExtractor;
+import ro.mta.facc.webcrawler.config.extractor.impl.FileTypeArgumentExtractor;
+import ro.mta.facc.webcrawler.config.extractor.impl.KeywordArgumentExtractor;
+import ro.mta.facc.webcrawler.download.FileDownloader;
+import ro.mta.facc.webcrawler.download.FileDownloaderImpl;
+import ro.mta.facc.webcrawler.filter.FileDimensionFilter;
+import ro.mta.facc.webcrawler.filter.FileTypeFilter;
+import ro.mta.facc.webcrawler.filter.KeywordFilter;
+import ro.mta.facc.webcrawler.parse.LinkExtractor;
+import ro.mta.facc.webcrawler.parse.LinkExtractorImpl;
+
 import java.util.List;
 
 /**
  * Aceasta clasa va controla modul in care crowler-ul efectueaza actiuni
  */
 public class Supervisor {
-
     private WebCrawlerConfig webCrawlerConfig;
     private List<String> linkList;
     private List<String> pathList;
@@ -37,15 +37,6 @@ public class Supervisor {
         fileDimensionArgumentExtractor = new FileDimensionArgumentExtractor();
         fileDownloader = new FileDownloaderImpl();
         linkExtractor = new LinkExtractorImpl();
-    }
-
-    /**
-     * Aceasta metoda se ocupa de setarea configuratiei crowler-ului pe baza argumentelor programului
-     *
-     * @param args lista de argumente a programului
-     */
-    public void constructConfiguration(String[] args) {
-
     }
 
     /**
@@ -69,6 +60,15 @@ public class Supervisor {
      */
     public void parseLink() {
 
+    }
+
+    /**
+     * Aceasta metoda seteaza configuratia web-crowler-ului
+     *
+     * @param args lista de argumente pentru configuratia web-crawler-ului
+     */
+    public void setConfiguration(String[] args) {
+        configFileParser.extractConfigArgument(args, webCrawlerConfig);
     }
 
 }

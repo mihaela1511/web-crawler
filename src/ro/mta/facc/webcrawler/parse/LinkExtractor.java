@@ -1,4 +1,4 @@
-package java.ro.mta.facc.webcrawler.parse;
+package ro.mta.facc.webcrawler.parse;
 
 import java.util.List;
 

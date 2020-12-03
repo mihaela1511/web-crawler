@@ -1,6 +1,6 @@
-package java.ro.mta.facc.webcrawler.download;
+package ro.mta.facc.webcrawler.download;
 
-import java.ro.mta.facc.webcrawler.config.WebCrawlerConfig;
+import ro.mta.facc.webcrawler.config.WebCrawlerConfig;
 
 /**
  * Aceasta clasa defineste modul in care este efectuata descarcarea unui fisier
