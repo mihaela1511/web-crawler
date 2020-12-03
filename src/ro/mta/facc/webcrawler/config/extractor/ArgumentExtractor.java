@@ -1,6 +1,6 @@
-package java.ro.mta.facc.webcrawler.config.extractor;
+package ro.mta.facc.webcrawler.config.extractor;
 
-import java.ro.mta.facc.webcrawler.config.WebCrawlerConfig;
+import ro.mta.facc.webcrawler.config.WebCrawlerConfig;
 
 /**
  * Interfata utilizata pentru a parsa configurarile aplicatiei trimise in linia de comanda

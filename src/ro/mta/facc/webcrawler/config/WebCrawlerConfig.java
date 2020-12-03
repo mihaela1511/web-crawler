@@ -1,4 +1,4 @@
-package java.ro.mta.facc.webcrawler.config;
+package ro.mta.facc.webcrawler.config;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ public class WebCrawlerConfig {
     private int numberThreads;
     private int logLevel;
     private String rootDir;
-    private int delay;
+    private String delay;
 
     public List<String> getKeywords() {
         return keywords;
@@ -55,11 +55,11 @@ public class WebCrawlerConfig {
         this.rootDir = rootDir;
     }
 
-    public int getDelay() {
+    public String getDelay() {
         return delay;
     }
 
-    public void setDelay(int delay) {
+    public void setDelay(String delay) {
         this.delay = delay;
     }
 
