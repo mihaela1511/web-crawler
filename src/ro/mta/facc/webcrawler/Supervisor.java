@@ -14,7 +14,8 @@ import ro.mta.facc.webcrawler.parse.LinkExtractor;
 import ro.mta.facc.webcrawler.parse.LinkExtractorImpl;
 
 import java.util.List;
-
+import java.nio.file.Files;
+import java.nio.file.Path;
 /**
  * Aceasta clasa va controla modul in care crowler-ul efectueaza actiuni
  */
@@ -62,6 +63,13 @@ public class Supervisor {
 
     }
 
+     /**
+     * Descarca toate fisierele din lista de url-uri
+     */
+    public void downloadAllURLs(){
+        linkList.forEach(link-> fileDownloader.downloadFile(link,webCrawlerConfig));
+    }
+    
     /**
      * Aceasta metoda seteaza configuratia web-crowler-ului
      *
@@ -71,4 +79,24 @@ public class Supervisor {
         configFileParser.extractConfigArgument(args, webCrawlerConfig);
     }
 
+     /**
+     * Aceasta metoda citeste fisierul ce contine link-urile si le salveaza in supervizor
+     *
+     * @param filePath calea catre fisierul ce contine link-urile
+     *
+     */
+    public void readLinksFile(String filePath) {
+
+        Path p = Path.of(filePath);
+
+        List<String> urls = null;
+        try {
+            urls = Files.readAllLines(p);
+            linkList = urls;
+        } catch (IOException e) {
+            System.out.println("Eroare la citirea fisierului " + filePath);
+        }
+    }
+    
+    
 }
