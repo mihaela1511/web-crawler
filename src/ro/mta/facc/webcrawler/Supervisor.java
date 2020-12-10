@@ -63,6 +63,13 @@ public class Supervisor {
 
     }
 
+     /**
+     * Descarca toate fisierele din lista de url-uri
+     */
+    public void downloadAllURLs(){
+        linkList.forEach(link-> fileDownloader.downloadFile(link,webCrawlerConfig));
+    }
+    
     /**
      * Aceasta metoda seteaza configuratia web-crowler-ului
      *
