@@ -157,4 +157,12 @@ public class Supervisor {
     }
 
 
+    /**
+     * Aceasta metoda seteaza dimensiunea maxima admisa pentru descarcarea unui fisier
+     *
+     * @param maxDim este dimensiunea maxima a fisierului in MB.
+     */
+    public void setMaxFileSize(String[] maxDim) {
+        fileDimensionArgumentExtractor.extractConfigArgument(maxDim, webCrawlerConfig);
+    }
 }
