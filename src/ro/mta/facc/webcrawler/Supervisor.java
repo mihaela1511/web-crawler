@@ -14,8 +14,12 @@ import ro.mta.facc.webcrawler.parse.LinkExtractor;
 import ro.mta.facc.webcrawler.parse.LinkExtractorImpl;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
 
@@ -35,8 +39,11 @@ public class Supervisor {
     private FileDownloader fileDownloader;
     private LinkExtractor linkExtractor;
 
+    private Map<String, String> webpageMap;
+
     public Supervisor() {
-        logger = Logger.getLogger(Supervisor.class.getName());
+            logger = Logger.getLogger(Supervisor.class.getName());
+
         webCrawlerConfig = new WebCrawlerConfig();
         configFileParser = new ConfigFileParser();
         fileTypeArgumentExtractor = new FileTypeArgumentExtractor();
@@ -44,12 +51,13 @@ public class Supervisor {
         fileDimensionArgumentExtractor = new FileDimensionArgumentExtractor();
         fileDownloader = new FileDownloaderImpl();
         linkExtractor = new LinkExtractorImpl();
+        webpageMap = new HashMap<>();
     }
 
     /**
      * Aceasta metoda se ocupa de parsarea fisierelor unui site descarcat anterior pe baza configuratiei crowler-ului
      */
-    public void parseLocalSite(String directoryPath) {
+    public void parseLocalSite(String directoryPath) throws IOException {
         FileTypeFilter.filter(directoryPath, webCrawlerConfig);
         FileDimensionFilter.filter(directoryPath, webCrawlerConfig);
         KeywordFilter.filter(directoryPath, webCrawlerConfig);
@@ -91,7 +99,7 @@ public class Supervisor {
                         if (url != null && !url.isEmpty()) {
                             String localPath = fileDownloader.downloadFile(url, webCrawlerConfig);
                             if (localPath != null) {
-                                linkList.add(localPath);
+                                linkList.add(localPath); //lista de cai locale
                                 isNotFinished = true;
                             }
                         }
@@ -129,6 +137,23 @@ public class Supervisor {
         } catch (IOException e) {
             System.out.println("Eroare la citirea fisierului " + filePath);
         }
+    }
+
+    /**
+     * Aceasta metoda retine tipurile de fisier pentru configuratia web-crowler-ului
+     *
+     * @param args lista de extensii fisier pentru configuratia web-crawler-ului
+     */
+    public void setFileTypeArgumentExtractor(String[] args) {
+        //copiez doar informatia relevanta (doar extensiile)
+        String[] fileExtensions = new String[args.length - 2];
+        for (int i=2; i<args.length; i++)
+        {
+            fileExtensions[i-2] = args[i];
+        }
+
+        this.fileTypeArgumentExtractor.extractConfigArgument(fileExtensions, webCrawlerConfig);
+
     }
 
 
