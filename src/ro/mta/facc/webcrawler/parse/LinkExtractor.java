@@ -15,4 +15,7 @@ public interface LinkExtractor {
      * @return lista de link-uri gasite
      */
     LinkedList<String> extractLinksFromFile(String filePath);
+    void setFilePath(String path);
+    String getFilePath();
+
 }
