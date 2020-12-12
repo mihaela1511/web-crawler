@@ -10,10 +10,10 @@ public class WebCrawlerConfig {
     private List<String> acceptedFileTypes;
     private List<String> keywords;
     private int maxDimension;
-    private int numberThreads;
-    private int logLevel;
-    private String rootDir;
-    private String delay;
+    private int numberThreads = 1;
+    private int logLevel = 3;
+    private String rootDir = System.getProperty("user.dir");
+    private String delay = "100ms";
 
     public List<String> getKeywords() {
         return keywords;

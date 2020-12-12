@@ -3,47 +3,93 @@ package ro.mta.facc.webcrawler.download;
 import ro.mta.facc.webcrawler.config.WebCrawlerConfig;
 
 import java.io.BufferedInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.logging.Logger;
 
 /**
  * Aceasta clasa defineste modul in care este efectuata descarcarea unui fisier
  */
 public class FileDownloaderImpl implements FileDownloader {
-    @Override
-    public void downloadFile(String downloadUrl, WebCrawlerConfig crawlerConfig) {
+    private static Logger logger = Logger.getLogger(FileDownloaderImpl.class.getName());
 
-        try (BufferedInputStream in = new BufferedInputStream(new URL(downloadUrl).openStream())){
+    @Override
+    public String downloadFile(String downloadUrl, WebCrawlerConfig crawlerConfig) {
+        URL url;
+        Path p = null;
+        try {
+            url = new URL(downloadUrl);
+        } catch (MalformedURLException e) {
+            if (crawlerConfig.getLogLevel() >= 2) {
+                logger.warning(String.format("Url-ul %s nu este valid!", downloadUrl));
+            }
+            return null;
+        }
+        try (BufferedInputStream in = new BufferedInputStream(url.openStream())) {
 
             String rootDir = crawlerConfig.getRootDir();
 
-            String aux = downloadUrl.substring(0,downloadUrl.indexOf("/"));
+            String aux = downloadUrl.substring(0, downloadUrl.indexOf("/"));
 
-            String downloadLocation = downloadUrl.replace(aux,rootDir);
+            String downloadLocation = downloadUrl.replace(aux, rootDir);
 
-            Path p = Path.of(downloadLocation);
+            p = Path.of(downloadLocation);
 
             Path parentDir = p.getParent();
 
-            if (!parentDir.toFile().exists()){
+            if (!parentDir.toFile().exists()) {
                 parentDir.toFile().mkdirs();
             }
 
-
-            FileOutputStream fos = new FileOutputStream(downloadLocation);
+            if (crawlerConfig.getLogLevel() >= 3) {
+                logger.info(String.format("Fisierul %s a fost creat pe disc", p.toString()));
+            }
+            FileOutputStream fos;
+            try {
+                fos = new FileOutputStream(p.toString());
+            } catch (FileNotFoundException e) {
+                logger.severe(String.format("Calea %s pentru salvarea paginii pe disc nu a putut fi creata!", p.toString()));
+                return null;
+            }
 
             byte[] dataBuffer = new byte[1024];
             int bytesRead;
 
-            while((bytesRead = in.read(dataBuffer,0,1024))!=-1){
-                fos.write(dataBuffer, 0, bytesRead);
+            if (crawlerConfig.getLogLevel() >= 3) {
+                logger.info(String.format("Se descarca %s", downloadUrl));
+            }
+            boolean downloadSuccessful = true;
+            try {
+                while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+                    try {
+                        fos.write(dataBuffer, 0, bytesRead);
+                    } catch (IOException e) {
+                        logger.severe(String.format("O parte din continutul fisierului %s nu a putut fi scrisa pe disc!", p.toString()));
+                        downloadSuccessful = false;
+                    }
+                }
+                if (crawlerConfig.getLogLevel() >= 3 && downloadSuccessful) {
+                    logger.info(String.format("Descarcarea pentru %s a fost finalizata cu succes", downloadUrl));
+                }
+            } catch (IOException e) {
+                if (crawlerConfig.getLogLevel() >= 2) {
+                    logger.warning(String.format("O parte din continutul fisierului aflat la url-ul %s nu a putut fi citita!", downloadUrl));
+                }
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            if (crawlerConfig.getLogLevel() >= 2) {
+                logger.warning(String.format("Conexiunea catre url-ul %s nu a putut fi stabilita!", downloadUrl));
+            }
         }
-
+        if (p != null) {
+            return p.toString();
+        } else {
+            return null;
+        }
     }
 }

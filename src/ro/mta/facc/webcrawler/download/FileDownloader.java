@@ -12,7 +12,8 @@ public interface FileDownloader {
      *
      * @param downloadUrl   URL-ul de la care va fi descarcat fisierul
      * @param crawlerConfig configurarile crowler-ului
+     * @return calea la care fisierul a fost salvat pe disc
      */
-    void downloadFile(String downloadUrl, WebCrawlerConfig crawlerConfig);
+    String downloadFile(String downloadUrl, WebCrawlerConfig crawlerConfig);
 
 }
