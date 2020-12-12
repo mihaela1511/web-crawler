@@ -1,14 +1,19 @@
 package ro.mta.facc.webcrawler;
 
+import ro.mta.facc.webcrawler.parse.LinkExtractorImpl;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Scanner;
 import java.util.logging.LogManager;
 
 public class WebCrawler {
     public static void main(String[] args) {
+
+
         try {
             InputStream stream = new FileInputStream(new File("src/logging.properties"));
             LogManager.getLogManager().readConfiguration(stream);
