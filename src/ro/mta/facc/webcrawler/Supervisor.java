@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
@@ -98,6 +99,7 @@ public class Supervisor {
                         String url = urlList.poll();
                         if (url != null && !url.isEmpty()) {
                             String localPath = fileDownloader.downloadFile(url, webCrawlerConfig);
+
                             if (localPath != null) {
                                 linkList.add(localPath); //lista de cai locale
                                 isNotFinished = true;
