@@ -13,16 +13,21 @@ import ro.mta.facc.webcrawler.filter.KeywordFilter;
 import ro.mta.facc.webcrawler.parse.LinkExtractor;
 import ro.mta.facc.webcrawler.parse.LinkExtractorImpl;
 
-import java.util.List;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.logging.Logger;
+
 /**
  * Aceasta clasa va controla modul in care crowler-ul efectueaza actiuni
  */
 public class Supervisor {
+    private static Logger logger = null;
+
     private WebCrawlerConfig webCrawlerConfig;
-    private List<String> linkList;
-    private List<String> pathList;
+    private ConcurrentLinkedQueue<String> linkList = new ConcurrentLinkedQueue<>();
+    private ConcurrentLinkedQueue<String> urlList = new ConcurrentLinkedQueue<>();
     private ConfigFileParser configFileParser;
     private FileTypeArgumentExtractor fileTypeArgumentExtractor;
     private KeywordArgumentExtractor keywordArgumentExtractor;
@@ -31,6 +36,7 @@ public class Supervisor {
     private LinkExtractor linkExtractor;
 
     public Supervisor() {
+        logger = Logger.getLogger(Supervisor.class.getName());
         webCrawlerConfig = new WebCrawlerConfig();
         configFileParser = new ConfigFileParser();
         fileTypeArgumentExtractor = new FileTypeArgumentExtractor();
@@ -63,13 +69,40 @@ public class Supervisor {
 
     }
 
-     /**
+    /**
      * Descarca toate fisierele din lista de url-uri
      */
-    public void downloadAllURLs(){
-        linkList.forEach(link-> fileDownloader.downloadFile(link,webCrawlerConfig));
+    public void downloadAllURLs(String filePath) {
+        readUrlsFile(filePath);
+        if (!urlList.isEmpty()) {
+            for (int i = 0; i < webCrawlerConfig.getNumberThreads(); i++) {
+                Thread thread = new Thread(() -> {
+                    try {
+                        Thread.sleep(Integer.parseInt(webCrawlerConfig.getDelay().split("ms")[0]));
+                    } catch (InterruptedException e) {
+                        if (webCrawlerConfig.getLogLevel() >= 2) {
+                            logger.warning("Thread.sleep a fost intrerupt!");
+                        }
+                    }
+                    boolean isNotFinished = true;
+                    while (isNotFinished) {
+                        isNotFinished = false;
+                        String url = urlList.poll();
+                        if (url != null && !url.isEmpty()) {
+                            String localPath = fileDownloader.downloadFile(url, webCrawlerConfig);
+                            if (localPath != null) {
+                                linkList.add(localPath);
+                                isNotFinished = true;
+                            }
+                        }
+                    }
+                });
+                thread.start();
+            }
+        }
+        linkList.forEach(link -> fileDownloader.downloadFile(link, webCrawlerConfig));
     }
-    
+
     /**
      * Aceasta metoda seteaza configuratia web-crowler-ului
      *
@@ -79,24 +112,24 @@ public class Supervisor {
         configFileParser.extractConfigArgument(args, webCrawlerConfig);
     }
 
-     /**
-     * Aceasta metoda citeste fisierul ce contine link-urile si le salveaza in supervizor
+    /**
+     * Aceasta metoda citeste fisierul ce contine url-urile si le salveaza in supervizor
      *
-     * @param filePath calea catre fisierul ce contine link-urile
-     *
+     * @param filePath calea catre fisierul ce contine url-urile
      */
-    public void readLinksFile(String filePath) {
+    private void readUrlsFile(String filePath) {
 
+        if (filePath == null || filePath.isEmpty()) {
+            System.out.println("Fisierul cu lista de url-uri nu a fost dat ca parametru");
+            return;
+        }
         Path p = Path.of(filePath);
-
-        List<String> urls = null;
         try {
-            urls = Files.readAllLines(p);
-            linkList = urls;
+            urlList.addAll(Files.readAllLines(p));
         } catch (IOException e) {
             System.out.println("Eroare la citirea fisierului " + filePath);
         }
     }
-    
-    
+
+
 }

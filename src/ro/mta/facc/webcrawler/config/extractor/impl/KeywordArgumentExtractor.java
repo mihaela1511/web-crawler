@@ -3,6 +3,9 @@ package ro.mta.facc.webcrawler.config.extractor.impl;
 import ro.mta.facc.webcrawler.config.WebCrawlerConfig;
 import ro.mta.facc.webcrawler.config.extractor.ArgumentExtractor;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Aceasta clasa se ocupa de extragerea listei de cuvinte cautate din lista de argumente ale programului
  */
