@@ -33,6 +33,7 @@ public class WebCrawler {
                     case "crawl" -> supervisor.setConfiguration(commandParts);
                     case "download" -> supervisor.downloadAllURLs(commandParts[2]);
                     case "list" -> supervisor.setFileTypeArgumentExtractor(commandParts); // Issue 3
+                    case "maxDim" -> supervisor.setMaxFileSize(commandParts);
                     default -> System.out.println("Comanda necunoscuta!");
                 }
 

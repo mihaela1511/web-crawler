@@ -10,6 +10,6 @@ import ro.mta.facc.webcrawler.config.extractor.ArgumentExtractor;
 public class FileDimensionArgumentExtractor implements ArgumentExtractor {
     @Override
     public void extractConfigArgument(String[] args, WebCrawlerConfig crawlerConfig) {
-
+        crawlerConfig.setMaxDimension(Integer.parseInt(args[2]));
     }
 }
