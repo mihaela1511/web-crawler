@@ -1,5 +1,6 @@
 package ro.mta.facc.webcrawler.parse;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -13,5 +14,5 @@ public interface LinkExtractor {
      * @param filePath calea catre fisier
      * @return lista de link-uri gasite
      */
-    List<String> extractLinksFromFile(String filePath);
+    LinkedList<String> extractLinksFromFile(String filePath);
 }

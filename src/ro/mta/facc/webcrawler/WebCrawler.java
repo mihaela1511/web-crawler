@@ -27,6 +27,7 @@ public class WebCrawler {
                 switch (commandParts[1]) {
                     case "crawl" -> supervisor.setConfiguration(commandParts);
                     case "download" -> supervisor.downloadAllURLs(commandParts[2]);
+                    case "list" -> supervisor.setFileTypeArgumentExtractor(commandParts); // Issue 3
                     default -> System.out.println("Comanda necunoscuta!");
                 }
 

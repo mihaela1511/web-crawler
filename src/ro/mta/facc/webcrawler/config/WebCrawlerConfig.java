@@ -64,10 +64,8 @@ public class WebCrawlerConfig {
     }
 
     public List<String> getAcceptedFileTypes() {
-        return acceptedFileTypes;
+        return this.acceptedFileTypes;
     }
 
-    public void setAcceptedFileTypes(List<String> acceptedFileTypes) {
-        this.acceptedFileTypes = acceptedFileTypes;
-    }
+    public void setAcceptedFileTypes(List<String> acceptedFileTypes) { this.acceptedFileTypes = acceptedFileTypes; }
 }
