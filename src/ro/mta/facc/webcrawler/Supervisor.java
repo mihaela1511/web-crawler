@@ -100,8 +100,15 @@ public class Supervisor {
                         if (url != null && !url.isEmpty()) {
                             String localPath = fileDownloader.downloadFile(url, webCrawlerConfig);
 
+                            linkExtractor.setFilePath(localPath);
+                            List<String> webpageUrlList = linkExtractor.extractLinksFromFile(localPath);
+
                             if (localPath != null) {
                                 linkList.add(localPath); //lista de cai locale
+                                for (int counter=0; counter<webpageUrlList.size(); counter++)
+                                {
+                                    linkList.add(webpageUrlList.get(counter));
+                                }
                                 isNotFinished = true;
                             }
                         }
