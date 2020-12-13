@@ -20,9 +20,6 @@ public class KeywordArgumentExtractor implements ArgumentExtractor {
         
         //Transforma toate argumentele primite intr-o lista
         List<String> words = Arrays.asList(args);
-
-        //Scoate cuvantul "search" din lista.
-        words.remove(0);
         
         crawlerConfig.setKeywords(words);
     }
