@@ -2,6 +2,7 @@ package ro.mta.facc.webcrawler.download;
 
 import ro.mta.facc.webcrawler.config.WebCrawlerConfig;
 import ro.mta.facc.webcrawler.filter.FileDimensionFilter;
+import ro.mta.facc.webcrawler.filter.FileTypeFilter;
 
 import java.io.BufferedInputStream;
 import java.io.FileNotFoundException;
@@ -68,18 +69,34 @@ public class FileDownloaderImpl implements FileDownloader {
             try {
                 while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
                     try {
-                        //Filtru Dimensiune
-                        FileDimensionFilter dimFilter = crawlerConfig.getFileDimensionFilter();
-                        if (dimFilter.filter(totalBytes, crawlerConfig) == true)
+                        String fpath = p.toString();
+                        String dirPath =parentDir.toString();
+                        String fileName = fpath.substring(dirPath.length() + 1, fpath.length());
+
+                        // Filtru Tip Fisier
+                        FileTypeFilter typeFilter = new FileTypeFilter();
+                        if (typeFilter.filter(fileName, crawlerConfig) == true)
                         {
-                            fos.write(dataBuffer, 0, bytesRead);
-                            totalBytes+=bytesRead;
+                            //Filtru Dimensiune
+                            FileDimensionFilter dimFilter = crawlerConfig.getFileDimensionFilter();
+                            if (dimFilter.filter(totalBytes, crawlerConfig) == true)
+                            {
+                                fos.write(dataBuffer, 0, bytesRead);
+                                totalBytes+=bytesRead;
+                            }
+                            else
+                            {
+                                System.out.println("Marime fisier depaseste limita maxima admisa de filtru!!!");
+                                throw new IOException("Marime fisier peste limita admisa de filtru!!!");
+                            }
                         }
                         else
                         {
-                            System.out.println("Marime fisier depaseste limita maxima admisa de filtru!!!");
-                            throw new IOException("Marime fisier peste limita admisa de filtru!!!");
+                            System.out.println("Extensia de fisier nu se afla in lista de fisiere admise");
+                            throw new IOException("Extensia de fisier nu se afla in lista de fisiere admise!!!");
                         }
+
+
                     } catch (IOException e) {
                         logger.severe(String.format("O parte din continutul fisierului %s nu a putut fi scrisa pe disc!", p.toString()));
                         logger.severe(String.format("Exceptie: ", e.getMessage()));
