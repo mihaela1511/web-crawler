@@ -1,12 +1,9 @@
 package ro.mta.facc.webcrawler;
 
-import ro.mta.facc.webcrawler.parse.LinkExtractorImpl;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 import java.util.Scanner;
 import java.util.logging.LogManager;
 
@@ -32,6 +29,8 @@ public class WebCrawler {
                     case "download" -> supervisor.downloadAllURLs(commandParts[2]);
                     case "list" -> supervisor.setFileTypeArgumentExtractor(commandParts);
                     case "maxDim" -> supervisor.setMaxFileSize(commandParts);
+                    case "search" -> supervisor.setKeywords(commandParts);
+                    case "localSiteDirectory" -> supervisor.setLocalSiteDirectory(commandParts[2]);
                     default -> System.out.println("Comanda necunoscuta!");
                 }
 

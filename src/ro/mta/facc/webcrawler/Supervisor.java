@@ -51,10 +51,12 @@ public class Supervisor {
     /**
      * Aceasta metoda se ocupa de parsarea fisierelor unui site descarcat anterior pe baza configuratiei crowler-ului
      */
-    public void parseLocalSite(String directoryPath) throws IOException {
-        FileTypeFilter.filter(directoryPath, webCrawlerConfig);
-        FileDimensionFilter.filter(directoryPath, webCrawlerConfig);
-        KeywordFilter.filter(directoryPath, webCrawlerConfig);
+    public void setLocalSiteDirectory(String directoryPath) {
+        if (directoryPath == null || directoryPath.isEmpty()) {
+            System.out.println("Calea catre directorului site-ului local nu a fost specificata!");
+        } else {
+            webCrawlerConfig.setLocalSiteDirectory(directoryPath);
+        }
     }
 
     /**
@@ -142,7 +144,19 @@ public class Supervisor {
         }
 
         this.fileTypeArgumentExtractor.extractConfigArgument(fileExtensions, webCrawlerConfig);
-
+        if (webCrawlerConfig.getLogLevel() >= 3) {
+            logger.info("Configurarea pentru tipul de fisiere acceptate a fost salvata");
+        }
+        if (webCrawlerConfig.getLocalSiteDirectory() != null && !webCrawlerConfig.getLocalSiteDirectory().isEmpty()) {
+            if (webCrawlerConfig.getLogLevel() >= 3) {
+                logger.info("Se incepe parsarea site-ului local pe baza tipului de fisiere acceptate");
+            }
+            FileTypeFilter.filterLocal(webCrawlerConfig.getLocalSiteDirectory(), webCrawlerConfig);
+        } else {
+            if (webCrawlerConfig.getLogLevel() >= 3) {
+                logger.info("Nu se va efectua parsarea unui site local pe baza tipului de fisiere acceptate pentru ca nu a fost setat nici un director pentru acesta");
+            }
+        }
     }
 
     /**
@@ -152,5 +166,44 @@ public class Supervisor {
      */
     public void setMaxFileSize(String[] maxDim) {
         fileDimensionArgumentExtractor.extractConfigArgument(maxDim, webCrawlerConfig);
+        if (webCrawlerConfig.getLogLevel() >= 3) {
+            logger.info("Configurarea pentru dimensiunea maxima a fisierului a fost salvata");
+        }
+        if (webCrawlerConfig.getLocalSiteDirectory() != null && !webCrawlerConfig.getLocalSiteDirectory().isEmpty()) {
+            if (webCrawlerConfig.getLogLevel() >= 3) {
+                logger.info("Se incepe parsarea site-ului local pe baza dimensiunii maxime a unui fisier");
+            }
+            FileDimensionFilter.filterLocal(webCrawlerConfig.getLocalSiteDirectory(), webCrawlerConfig);
+        } else {
+            if (webCrawlerConfig.getLogLevel() >= 3) {
+                logger.info("Nu se va efectua parsarea unui site local pe baza dimensiunii maxime a unui fisier pentru ca nu a fost setat nici un director pentru acesta");
+            }
+        }
+    }
+
+    /**
+     * Aceasta metoda seteaza cuvintele cheie ce vor fi cautate in fisier
+     *
+     * @param args argumentele care contin lista de cuvinte cheie
+     */
+    public void setKeywords(String[] args) {
+        String[] fileExtensions = new String[args.length - 2];
+        for (int i = 2; i < args.length; i++) {
+            fileExtensions[i - 2] = args[i];
+        }
+        keywordArgumentExtractor.extractConfigArgument(args, webCrawlerConfig);
+        if (webCrawlerConfig.getLogLevel() >= 3) {
+            logger.info("Configurarea pentru lista de cuvinte cheie a fost salvata");
+        }
+        if (webCrawlerConfig.getLocalSiteDirectory() != null && !webCrawlerConfig.getLocalSiteDirectory().isEmpty()) {
+            if (webCrawlerConfig.getLogLevel() >= 3) {
+                logger.info("Se incepe parsarea site-ului local pe baza listei de cuvinte cheie");
+            }
+            KeywordFilter.filterLocal(webCrawlerConfig.getLocalSiteDirectory(), webCrawlerConfig);
+        } else {
+            if (webCrawlerConfig.getLogLevel() >= 3) {
+                logger.info("Nu se va efectua parsarea unui site local pe baza listei de cuvinte cheie pentru ca nu a fost setat nici un director pentru acesta");
+            }
+        }
     }
 }

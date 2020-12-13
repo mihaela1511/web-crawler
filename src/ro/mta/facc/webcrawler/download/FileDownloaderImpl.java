@@ -4,10 +4,7 @@ import ro.mta.facc.webcrawler.config.WebCrawlerConfig;
 import ro.mta.facc.webcrawler.filter.FileDimensionFilter;
 import ro.mta.facc.webcrawler.filter.FileTypeFilter;
 
-import java.io.BufferedInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -70,40 +67,42 @@ public class FileDownloaderImpl implements FileDownloader {
                 while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
                     try {
                         String fpath = p.toString();
-                        String dirPath =parentDir.toString();
+                        String dirPath = parentDir.toString();
                         String fileName = fpath.substring(dirPath.length() + 1, fpath.length());
 
                         // Filtru Tip Fisier
                         FileTypeFilter typeFilter = new FileTypeFilter();
-                        if (typeFilter.filter(fileName, crawlerConfig) == true)
-                        {
+                        if (typeFilter.filter(fileName, crawlerConfig) == true) {
                             //Filtru Dimensiune
                             FileDimensionFilter dimFilter = crawlerConfig.getFileDimensionFilter();
-                            if (dimFilter.filter(totalBytes, crawlerConfig) == true)
-                            {
+                            if (dimFilter.filter(totalBytes, crawlerConfig) == true) {
                                 fos.write(dataBuffer, 0, bytesRead);
-                                totalBytes+=bytesRead;
+                                totalBytes += bytesRead;
+                            } else {
+                                fos.close();
+                                File downloadedFileParts = new File(p.toString());
+                                if (downloadedFileParts.delete()) {
+                                    if (crawlerConfig.getLogLevel() >= 3) {
+                                        logger.info(String.format("Fisierul %s a fost sters pentru ca a depasit dimensiunea maxim admisa", p.toString()));
+                                    }
+                                } else {
+                                    logger.severe(String.format("Fisierul % nu a putut fi sters!!", p.toString()));
+                                }
+                                if (crawlerConfig.getLogLevel() >= 2) {
+                                    logger.warning(String.format("Marimea pentru fisierul %s depaseste limita maxima admisa de filtru!!!", p.toString()));
+                                }
+                                return null;
                             }
-                            else
-                            {
-                                System.out.println("Marime fisier depaseste limita maxima admisa de filtru!!!");
-                                throw new IOException("Marime fisier peste limita admisa de filtru!!!");
+                        } else {
+                            if (crawlerConfig.getLogLevel() >= 2) {
+                                logger.warning(String.format("Extensia pentru fisierul %s nu se afla in lista de fisiere admise", p.toString()));
                             }
+                            return null;
                         }
-                        else
-                        {
-                            System.out.println("Extensia de fisier nu se afla in lista de fisiere admise");
-                            throw new IOException("Extensia de fisier nu se afla in lista de fisiere admise!!!");
-                        }
-
 
                     } catch (IOException e) {
                         logger.severe(String.format("O parte din continutul fisierului %s nu a putut fi scrisa pe disc!", p.toString()));
-                        logger.severe(String.format("Exceptie: ", e.getMessage()));
-                        e.printStackTrace();
-
                         downloadSuccessful = false;
-                        break; //sparge while
                     }
                 }
                 if (crawlerConfig.getLogLevel() >= 3 && downloadSuccessful) {

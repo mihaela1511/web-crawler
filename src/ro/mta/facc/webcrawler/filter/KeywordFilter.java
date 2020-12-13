@@ -2,78 +2,22 @@ package ro.mta.facc.webcrawler.filter;
 
 import ro.mta.facc.webcrawler.config.WebCrawlerConfig;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
  * Aceasta clasa se ocupa de filtrarea fisierelor dintr-un anumit director in functie de o lista de cuvinte cheie
  */
 public class KeywordFilter {
+    private static Logger logger = Logger.getLogger(KeywordFilter.class.getName());
 
-    private static void emptyDirectory(File dir) {
-
-        for (File file : dir.listFiles()) {
-            if (file.isDirectory()) {
-                emptyDirectory(file);
-            }
-            file.delete();
-        }
-    }
-
-    private static void emptyDefaultDir(String root) {
-
-        File dir = new File(Paths.get(root, "KeywordFilteredFiles").toString());
-
-        if (!dir.exists()) {
-            return;
-        }
-
-        emptyDirectory(dir);
-
-        dir.delete();
-    }
-
-
-    private static void moveFilteredFiles(List<Path> filteredFiles, String baseDir) {
-
-        final Path filteredDirPath = Path.of(baseDir, "KeywordFilteredFiles");
-
-        if (!Files.exists(filteredDirPath)) {
-            try {
-                Files.createDirectory(filteredDirPath);
-            } catch (IOException e) {
-                System.out.println("Eroare la crearea directoarelor pentru salvarea site-ului");
-            }
-        }
-
-        filteredFiles.forEach(filePath -> {
-
-            String absPath = filePath.toAbsolutePath().toString();
-
-            absPath = absPath.replace(baseDir, filteredDirPath.toString());
-
-            try {
-                Path p = Paths.get(absPath);
-
-
-                if (!Files.exists(p.getParent())) {
-                    new File(p.toString()).mkdirs();
-                }
-
-                Files.copy(filePath, p, StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-
-    }
-
-
-    public static void filter(String directoryPath, WebCrawlerConfig crawlerConfig) {
-        emptyDefaultDir(directoryPath);
+    public static void filterLocal(String directoryPath, WebCrawlerConfig crawlerConfig) {
+        BaseFilter.emptyDefaultDir(directoryPath, "KeywordFilteredFiles");
 
         final List<String> keywords = crawlerConfig.getKeywords();
 
@@ -96,16 +40,16 @@ public class KeywordFilter {
                     return keywords.stream().anyMatch(text::contains);
 
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.severe(String.format("Continutul fisierului % s nu a putut fi parsat", path.toString()));
                     return false;
                 }
 
             }, FileVisitOption.FOLLOW_LINKS).collect(Collectors.toList());
         } catch (IOException e) {
-            System.out.println("Calea catre fisier nu a putut fi gasita");
+            logger.severe(String.format("Un fisier din directorul %s nu a putut fi deschis", directoryPath));
         }
 
 
-        moveFilteredFiles(filteredFiles, directoryPath);
+        BaseFilter.moveFilteredFiles(filteredFiles, directoryPath, "KeywordFilteredFiles");
     }
 }

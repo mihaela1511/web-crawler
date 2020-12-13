@@ -17,6 +17,7 @@ public class WebCrawlerConfig {
     private String rootDir = System.getProperty("user.dir");
     private String delay = "100ms";
     private FileDimensionFilter dimFilter;
+    private String localSiteDirectory;
 
     public List<String> getKeywords() {
         return keywords;
@@ -75,5 +76,13 @@ public class WebCrawlerConfig {
 
     public FileDimensionFilter getFileDimensionFilter() {
         return this.dimFilter;
+    }
+
+    public String getLocalSiteDirectory() {
+        return localSiteDirectory;
+    }
+
+    public void setLocalSiteDirectory(String localSiteDirectory) {
+        this.localSiteDirectory = localSiteDirectory;
     }
 }
