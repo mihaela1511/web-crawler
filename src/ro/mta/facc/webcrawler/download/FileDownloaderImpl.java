@@ -39,7 +39,7 @@ public class FileDownloaderImpl implements FileDownloader {
 
             String downloadLocation = downloadUrl.replace(aux, rootDir);
 
-            p = Path.of(downloadLocation);
+            p = Path.of(downloadLocation.replaceAll("\\?", "/"));
 
             Path parentDir = p.getParent();
 

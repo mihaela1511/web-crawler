@@ -14,13 +14,9 @@ import ro.mta.facc.webcrawler.parse.LinkExtractor;
 import ro.mta.facc.webcrawler.parse.LinkExtractorImpl;
 
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
 
@@ -40,10 +36,8 @@ public class Supervisor {
     private FileDownloader fileDownloader;
     private LinkExtractor linkExtractor;
 
-    private Map<String, String> webpageMap;
-
     public Supervisor() {
-            logger = Logger.getLogger(Supervisor.class.getName());
+        logger = Logger.getLogger(Supervisor.class.getName());
 
         webCrawlerConfig = new WebCrawlerConfig();
         configFileParser = new ConfigFileParser();
@@ -52,7 +46,6 @@ public class Supervisor {
         fileDimensionArgumentExtractor = new FileDimensionArgumentExtractor();
         fileDownloader = new FileDownloaderImpl();
         linkExtractor = new LinkExtractorImpl();
-        webpageMap = new HashMap<>();
     }
 
     /**
@@ -62,20 +55,6 @@ public class Supervisor {
         FileTypeFilter.filter(directoryPath, webCrawlerConfig);
         FileDimensionFilter.filter(directoryPath, webCrawlerConfig);
         KeywordFilter.filter(directoryPath, webCrawlerConfig);
-    }
-
-    /**
-     * Aceasta metoda se ocupa de descarcarea unui fisier
-     */
-    public void downloadFile() {
-
-    }
-
-    /**
-     * Aceasta metoda se ocupa de parsarea link-urilor dintr-un fisier
-     */
-    public void parseLink() {
-
     }
 
     /**
@@ -99,25 +78,27 @@ public class Supervisor {
                         String url = urlList.poll();
                         if (url != null && !url.isEmpty()) {
                             String localPath = fileDownloader.downloadFile(url, webCrawlerConfig);
-
-                            linkExtractor.setFilePath(localPath);
-                            List<String> webpageUrlList = linkExtractor.extractLinksFromFile(localPath);
-
                             if (localPath != null) {
-                                linkList.add(localPath); //lista de cai locale
-                                for (int counter=0; counter<webpageUrlList.size(); counter++)
-                                {
-                                    linkList.add(webpageUrlList.get(counter));
-                                }
+                                linkList.add(localPath);
                                 isNotFinished = true;
                             }
+                        }
+                        String localFile = linkList.poll();
+                        if (localFile != null && !localFile.isEmpty()) {
+                            linkExtractor.setFilePath(localFile);
+                            List<String> webpageUrlList = linkExtractor.extractLinksFromFile(localFile, webCrawlerConfig);
+                            if (webpageUrlList != null) {
+                                for (int counter = 0; counter < webpageUrlList.size(); counter++) {
+                                    urlList.add(webpageUrlList.get(counter));
+                                }
+                            }
+                            isNotFinished = true;
                         }
                     }
                 });
                 thread.start();
             }
         }
-        linkList.forEach(link -> fileDownloader.downloadFile(link, webCrawlerConfig));
     }
 
     /**
@@ -156,15 +137,13 @@ public class Supervisor {
     public void setFileTypeArgumentExtractor(String[] args) {
         //copiez doar informatia relevanta (doar extensiile)
         String[] fileExtensions = new String[args.length - 2];
-        for (int i=2; i<args.length; i++)
-        {
-            fileExtensions[i-2] = args[i];
+        for (int i = 2; i < args.length; i++) {
+            fileExtensions[i - 2] = args[i];
         }
 
         this.fileTypeArgumentExtractor.extractConfigArgument(fileExtensions, webCrawlerConfig);
 
     }
-
 
     /**
      * Aceasta metoda seteaza dimensiunea maxima admisa pentru descarcarea unui fisier

@@ -12,8 +12,6 @@ import java.util.logging.LogManager;
 
 public class WebCrawler {
     public static void main(String[] args) {
-
-
         try {
             InputStream stream = new FileInputStream(new File("src/logging.properties"));
             LogManager.getLogManager().readConfiguration(stream);
@@ -32,7 +30,7 @@ public class WebCrawler {
                 switch (commandParts[1]) {
                     case "crawl" -> supervisor.setConfiguration(commandParts);
                     case "download" -> supervisor.downloadAllURLs(commandParts[2]);
-                    case "list" -> supervisor.setFileTypeArgumentExtractor(commandParts); // Issue 3
+                    case "list" -> supervisor.setFileTypeArgumentExtractor(commandParts);
                     case "maxDim" -> supervisor.setMaxFileSize(commandParts);
                     default -> System.out.println("Comanda necunoscuta!");
                 }
