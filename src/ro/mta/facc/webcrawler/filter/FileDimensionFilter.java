@@ -11,8 +11,9 @@ public class FileDimensionFilter {
 
     }
 
-    public static boolean filter(int dimension, WebCrawlerConfig crawlerConfig) {
-        int maxDim = crawlerConfig.getMaxDimension();
+    public static boolean filter(long dimension, WebCrawlerConfig crawlerConfig) {
+        long maxDim = crawlerConfig.getMaxDimension();
+        maxDim *= 1000000; // conversie in MB
 
         if (maxDim == 0)
         {

@@ -59,7 +59,7 @@ public class FileDownloaderImpl implements FileDownloader {
 
             byte[] dataBuffer = new byte[1024];
             int bytesRead;
-            int totalBytes = 0;
+            long totalBytes = 0;
 
             if (crawlerConfig.getLogLevel() >= 3) {
                 logger.info(String.format("Se descarca %s", downloadUrl));
