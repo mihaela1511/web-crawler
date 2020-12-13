@@ -1,6 +1,7 @@
 package ro.mta.facc.webcrawler.download;
 
 import ro.mta.facc.webcrawler.config.WebCrawlerConfig;
+import ro.mta.facc.webcrawler.filter.FileDimensionFilter;
 
 import java.io.BufferedInputStream;
 import java.io.FileNotFoundException;
@@ -58,6 +59,7 @@ public class FileDownloaderImpl implements FileDownloader {
 
             byte[] dataBuffer = new byte[1024];
             int bytesRead;
+            int totalBytes = 0;
 
             if (crawlerConfig.getLogLevel() >= 3) {
                 logger.info(String.format("Se descarca %s", downloadUrl));
@@ -66,10 +68,25 @@ public class FileDownloaderImpl implements FileDownloader {
             try {
                 while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
                     try {
-                        fos.write(dataBuffer, 0, bytesRead);
+                        //Filtru Dimensiune
+                        FileDimensionFilter dimFilter = crawlerConfig.getFileDimensionFilter();
+                        if (dimFilter.filter(totalBytes, crawlerConfig) == true)
+                        {
+                            fos.write(dataBuffer, 0, bytesRead);
+                            totalBytes+=bytesRead;
+                        }
+                        else
+                        {
+                            System.out.println("Marime fisier depaseste limita maxima admisa de filtru!!!");
+                            throw new IOException("Marime fisier peste limita admisa de filtru!!!");
+                        }
                     } catch (IOException e) {
                         logger.severe(String.format("O parte din continutul fisierului %s nu a putut fi scrisa pe disc!", p.toString()));
+                        logger.severe(String.format("Exceptie: ", e.getMessage()));
+                        e.printStackTrace();
+
                         downloadSuccessful = false;
+                        break; //sparge while
                     }
                 }
                 if (crawlerConfig.getLogLevel() >= 3 && downloadSuccessful) {

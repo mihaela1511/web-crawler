@@ -1,5 +1,7 @@
 package ro.mta.facc.webcrawler.config;
 
+import ro.mta.facc.webcrawler.filter.FileDimensionFilter;
+
 import java.util.List;
 
 /**
@@ -14,6 +16,7 @@ public class WebCrawlerConfig {
     private int logLevel = 3;
     private String rootDir = System.getProperty("user.dir");
     private String delay = "100ms";
+    private FileDimensionFilter dimFilter;
 
     public List<String> getKeywords() {
         return keywords;
@@ -29,6 +32,7 @@ public class WebCrawlerConfig {
 
     public void setMaxDimension(int maxDimension) {
         this.maxDimension = maxDimension;
+        this.dimFilter = new FileDimensionFilter();
     }
 
     public int getNumberThreads() {
@@ -68,4 +72,8 @@ public class WebCrawlerConfig {
     }
 
     public void setAcceptedFileTypes(List<String> acceptedFileTypes) { this.acceptedFileTypes = acceptedFileTypes; }
+
+    public FileDimensionFilter getFileDimensionFilter() {
+        return this.dimFilter;
+    }
 }
