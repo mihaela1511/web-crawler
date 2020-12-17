@@ -27,7 +27,7 @@ public class Supervisor {
     private static Logger logger = null;
 
     private WebCrawlerConfig webCrawlerConfig;
-    private ConcurrentLinkedQueue<String> urlList = new ConcurrentLinkedQueue<>();
+    private ConcurrentLinkedQueue<UrlData> urlList = new ConcurrentLinkedQueue<>();
     private ConfigFileParser configFileParser;
     private FileTypeArgumentExtractor fileTypeArgumentExtractor;
     private KeywordArgumentExtractor keywordArgumentExtractor;
@@ -76,19 +76,22 @@ public class Supervisor {
                     boolean isNotFinished = true;
                     while (isNotFinished) {
                         isNotFinished = false;
-                        String url = urlList.poll();
-                        if (url != null && !url.isEmpty()) {
-                            String localPath = fileDownloader.downloadFile(url, webCrawlerConfig);
-                            if (localPath != null) {
+                        UrlData urlInfo = urlList.poll();
+                        if (urlInfo != null && !urlInfo.getUrl().isEmpty()) {
+                            String localPath = fileDownloader.downloadFile(urlInfo.getUrl(), webCrawlerConfig);
+                            if (localPath != null && urlInfo.getLevel() <= webCrawlerConfig.getLevel()) {
                                 linkExtractor.setFilePath(localPath);
-                                List<String> webpageUrlList = linkExtractor.extractLinksFromFile(url, localPath, webCrawlerConfig);
+                                List<String> webpageUrlList = linkExtractor.extractLinksFromFile(urlInfo.getUrl(), localPath, webCrawlerConfig);
                                 if (webpageUrlList != null) {
                                     for (int counter = 0; counter < webpageUrlList.size(); counter++) {
-                                        urlList.add(webpageUrlList.get(counter));
+                                        UrlData urlData = new UrlData();
+                                        urlData.setLevel(urlInfo.getLevel() + 1);
+                                        urlData.setUrl(webpageUrlList.get(counter));
+                                        urlList.add(urlData);
                                     }
                                 }
-                                isNotFinished = true;
                             }
+                            isNotFinished = true;
                         }
                     }
                 });
@@ -119,7 +122,12 @@ public class Supervisor {
         }
         Path p = Path.of(filePath);
         try {
-            urlList.addAll(Files.readAllLines(p));
+            Files.readAllLines(p).forEach(url -> {
+                UrlData urlData = new UrlData();
+                urlData.setLevel(0);
+                urlData.setUrl(url);
+                urlList.add(urlData);
+            });
         } catch (IOException e) {
             System.out.println("Eroare la citirea fisierului " + filePath);
         }
@@ -198,6 +206,27 @@ public class Supervisor {
             if (webCrawlerConfig.getLogLevel() >= 3) {
                 logger.info("Nu se va efectua parsarea unui site local pe baza listei de cuvinte cheie pentru ca nu a fost setat nici un director pentru acesta");
             }
+        }
+    }
+
+    private class UrlData {
+        int level;
+        String url;
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        public int getLevel() {
+            return level;
+        }
+
+        public void setLevel(int level) {
+            this.level = level;
         }
     }
 }

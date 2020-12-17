@@ -18,6 +18,15 @@ public class WebCrawlerConfig {
     private String delay = "100ms";
     private FileDimensionFilter dimFilter;
     private String localSiteDirectory;
+    private int level = 3;
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
 
     public List<String> getKeywords() {
         return keywords;
@@ -72,7 +81,9 @@ public class WebCrawlerConfig {
         return this.acceptedFileTypes;
     }
 
-    public void setAcceptedFileTypes(List<String> acceptedFileTypes) { this.acceptedFileTypes = acceptedFileTypes; }
+    public void setAcceptedFileTypes(List<String> acceptedFileTypes) {
+        this.acceptedFileTypes = acceptedFileTypes;
+    }
 
     public FileDimensionFilter getFileDimensionFilter() {
         return this.dimFilter;
