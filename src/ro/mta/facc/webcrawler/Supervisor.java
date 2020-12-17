@@ -27,7 +27,6 @@ public class Supervisor {
     private static Logger logger = null;
 
     private WebCrawlerConfig webCrawlerConfig;
-    private ConcurrentLinkedQueue<String> linkList = new ConcurrentLinkedQueue<>();
     private ConcurrentLinkedQueue<String> urlList = new ConcurrentLinkedQueue<>();
     private ConfigFileParser configFileParser;
     private FileTypeArgumentExtractor fileTypeArgumentExtractor;
@@ -81,20 +80,15 @@ public class Supervisor {
                         if (url != null && !url.isEmpty()) {
                             String localPath = fileDownloader.downloadFile(url, webCrawlerConfig);
                             if (localPath != null) {
-                                linkList.add(localPath);
+                                linkExtractor.setFilePath(localPath);
+                                List<String> webpageUrlList = linkExtractor.extractLinksFromFile(url, localPath, webCrawlerConfig);
+                                if (webpageUrlList != null) {
+                                    for (int counter = 0; counter < webpageUrlList.size(); counter++) {
+                                        urlList.add(webpageUrlList.get(counter));
+                                    }
+                                }
                                 isNotFinished = true;
                             }
-                        }
-                        String localFile = linkList.poll();
-                        if (localFile != null && !localFile.isEmpty()) {
-                            linkExtractor.setFilePath(localFile);
-                            List<String> webpageUrlList = linkExtractor.extractLinksFromFile(localFile, webCrawlerConfig);
-                            if (webpageUrlList != null) {
-                                for (int counter = 0; counter < webpageUrlList.size(); counter++) {
-                                    urlList.add(webpageUrlList.get(counter));
-                                }
-                            }
-                            isNotFinished = true;
                         }
                     }
                 });

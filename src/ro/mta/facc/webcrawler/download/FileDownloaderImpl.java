@@ -31,12 +31,17 @@ public class FileDownloaderImpl implements FileDownloader {
         try (BufferedInputStream in = new BufferedInputStream(url.openStream())) {
 
             String rootDir = crawlerConfig.getRootDir();
+            String downloadLocation;
 
-            String aux = downloadUrl.substring(0, downloadUrl.indexOf("/"));
+            String tempLocation = downloadUrl.replaceAll("[\\\\/:*?\"<>|]", "/");
+            if (!downloadUrl.contains("/")) {
+                downloadLocation = rootDir.concat("\\").concat(tempLocation);
+            } else {
+                String aux = tempLocation.substring(0, tempLocation.indexOf("/"));
+                downloadLocation = tempLocation.replace(aux, rootDir);
+            }
 
-            String downloadLocation = downloadUrl.replace(aux, rootDir);
-
-            p = Path.of(downloadLocation.replaceAll("\\?", "/"));
+            p = Path.of(downloadLocation);
 
             Path parentDir = p.getParent();
 

@@ -5,6 +5,8 @@ import ro.mta.facc.webcrawler.config.WebCrawlerConfig;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -24,9 +26,7 @@ public class LinkExtractorImpl implements LinkExtractor {
     private List<String> extractedURLs;
     private File webpage;
     private static final Pattern urlPattern = Pattern.compile(
-            "(?:^|[\\W])((ht|f)tp(s?):\\/\\/|www\\.)"
-                    + "(([\\w\\-]+\\.){1,}?([\\w\\-.~]+\\/?)*"
-                    + "[\\p{Alnum}.,%_=?&#\\-+()\\[\\]\\*$~@!:/{};']*)",
+            "\\s*(?i)href\\s*=\\s*(\"([^\"]*\")|'[^']*'|([^'\">\\s]+))",
             Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
 
     public LinkExtractorImpl() {
@@ -57,10 +57,19 @@ public class LinkExtractorImpl implements LinkExtractor {
 
 
     @Override
-    public LinkedList<String> extractLinksFromFile(String filePath, WebCrawlerConfig crawlerConfig) {
+    public LinkedList<String> extractLinksFromFile(String stringUrl, String filePath, WebCrawlerConfig crawlerConfig) {
         if (existFile()) {
             LinkedList<String> AllLinks = new LinkedList<String>();
             Map<String, String> replaceMap = new HashMap<>();
+            URL url;
+            try {
+                url = new URL(stringUrl);
+            } catch (MalformedURLException e) {
+                if (crawlerConfig.getLogLevel() >= 2) {
+                    logger.warning(String.format("Url-ul %s nu este valid!", stringUrl));
+                }
+                return null;
+            }
             try {
                 Scanner myReader = new Scanner(webpage);
                 if (crawlerConfig.getLogLevel() >= 3) {
@@ -71,23 +80,30 @@ public class LinkExtractorImpl implements LinkExtractor {
 
                     Matcher matcher = urlPattern.matcher(data);
                     while (matcher.find()) {
-                        int matchStart = matcher.start(1);
-                        int matchEnd = matcher.end();
                         String r = matcher.group(0);
+                        r = r.replaceAll("'", "");
+                        r = r.replaceAll("\"", "");
+                        r = r.replaceAll("href=", "");
+                        r = r.replaceAll(" ", "");
+                        if (r.charAt(0) != '#') {
+                            if (r.charAt(0) == '/') {
+                                r = url.getProtocol().concat("://").concat(url.getHost()).concat(r);
+                            }
+                            String downloadLocation;
+                            String rootDir = crawlerConfig.getRootDir();
+                            String tempLocation = r.replaceAll("[\\\\/:*?\"<>|]", "/");
+                            if (!r.contains("/")) {
+                                downloadLocation = rootDir.concat("\\").concat(tempLocation);
+                            } else {
+                                String aux = tempLocation.substring(0, tempLocation.indexOf("/"));
+                                downloadLocation = tempLocation.replace(aux, rootDir);
+                            }
 
-                        if (r.indexOf("\"") != -1) {
-                            r = r.substring(1, r.length());
+                            Path p = Path.of(downloadLocation);
+
+                            replaceMap.put(r, p.toString().replace("\\", "\\\\"));
+                            AllLinks.add(r);
                         }
-                        String rootDir = crawlerConfig.getRootDir();
-
-                        String aux = r.substring(0, r.indexOf("/"));
-
-                        String downloadLocation = r.replace(aux, rootDir);
-
-                        Path p = Path.of(downloadLocation.replaceAll("\\?", "/"));
-
-                        replaceMap.put(r, p.toString().replace("\\", "\\\\"));
-                        AllLinks.add(r);
                     }
                 }
                 myReader.close();
