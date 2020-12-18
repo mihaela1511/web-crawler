@@ -93,10 +93,18 @@ public class LinkExtractorImpl implements LinkExtractor {
                             String rootDir = crawlerConfig.getRootDir();
                             String tempLocation = r.replaceAll("[\\\\/:*?\"<>|]", "/");
                             if (!r.contains("/")) {
-                                downloadLocation = rootDir.concat("\\").concat(tempLocation);
+                                downloadLocation = rootDir.concat("\\").concat(tempLocation).concat("\\index.html");
                             } else {
                                 String aux = tempLocation.substring(0, tempLocation.indexOf("/"));
                                 downloadLocation = tempLocation.replace(aux, rootDir);
+                                String fileName = tempLocation.substring(tempLocation.lastIndexOf('/') + 1, tempLocation.length());
+                                if (!fileName.isEmpty()) {
+                                    if (fileName.lastIndexOf('.') < 0) {
+                                        downloadLocation = downloadLocation.concat(".html");
+                                    }
+                                } else {
+                                    downloadLocation = downloadLocation.concat("\\index.html");
+                                }
                             }
 
                             Path p = Path.of(downloadLocation);
