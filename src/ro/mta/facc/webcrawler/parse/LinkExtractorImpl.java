@@ -80,27 +80,29 @@ public class LinkExtractorImpl implements LinkExtractor {
 
                     Matcher matcher = urlPattern.matcher(data);
                     while (matcher.find()) {
-                        String r = matcher.group(0);
+                        String r = matcher.group(1);
                         r = r.replaceAll("'", "");
                         r = r.replaceAll("\"", "");
-                        r = r.replaceAll("href=", "");
-                        r = r.replaceAll(" ", "");
-                        if (r.charAt(0) != '#') {
+                        if (r.length() > 5 && r.charAt(0) != '#' && !r.contains("(")) {
                             if (r.charAt(0) == '/') {
                                 r = url.getProtocol().concat("://").concat(url.getHost()).concat(r);
                             }
                             String downloadLocation;
                             String rootDir = crawlerConfig.getRootDir();
-                            String tempLocation = r.replaceAll("[\\\\/:*?\"<>|]", "/");
+                            String tempLocation = r.replaceAll("[\\\\/:*?\"<>|\\-=]", "/");
+                            tempLocation = tempLocation.replaceAll(" ", "");
                             if (!r.contains("/")) {
                                 downloadLocation = rootDir.concat("\\").concat(tempLocation).concat("\\index.html");
                             } else {
                                 String aux = tempLocation.substring(0, tempLocation.indexOf("/"));
-                                downloadLocation = tempLocation.replace(aux, rootDir);
+                                downloadLocation = tempLocation.replaceFirst(aux, rootDir);
                                 String fileName = tempLocation.substring(tempLocation.lastIndexOf('/') + 1, tempLocation.length());
                                 if (!fileName.isEmpty()) {
                                     if (fileName.lastIndexOf('.') < 0) {
                                         downloadLocation = downloadLocation.concat(".html");
+                                    }
+                                    if (url.getHost().equalsIgnoreCase(fileName)) {
+                                        downloadLocation = downloadLocation.concat("\\index.html");
                                     }
                                 } else {
                                     downloadLocation = downloadLocation.concat("\\index.html");
@@ -119,7 +121,7 @@ public class LinkExtractorImpl implements LinkExtractor {
                 try {
                     String content = Files.readString(Path.of(filePath));
                     for (Map.Entry<String, String> entry : replaceMap.entrySet()) {
-                        content = content.replaceAll(entry.getKey(), entry.getValue());
+                        content = content.replace(entry.getKey(), entry.getValue());
                     }
                     Files.writeString(Path.of(filePath), content, StandardOpenOption.TRUNCATE_EXISTING);
                 } catch (IOException e) {
