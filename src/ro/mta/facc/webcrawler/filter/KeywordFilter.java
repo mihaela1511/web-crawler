@@ -40,7 +40,7 @@ public class KeywordFilter {
                     return keywords.stream().anyMatch(text::contains);
 
                 } catch (IOException e) {
-                    logger.severe(String.format("Continutul fisierului % s nu a putut fi parsat", path.toString()));
+                    logger.severe(String.format("Continutul fisierului %s nu a putut fi parsat", path.toString()));
                     return false;
                 }
 

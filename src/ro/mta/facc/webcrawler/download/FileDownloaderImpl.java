@@ -33,16 +33,19 @@ public class FileDownloaderImpl implements FileDownloader {
             String rootDir = crawlerConfig.getRootDir();
             String downloadLocation;
 
-            String tempLocation = downloadUrl.replaceAll("[\\\\/:*?\"<>|]", "/");
+            String tempLocation = downloadUrl.replaceAll("[\\\\/:*?\"<>|\\-=]", "/");
             if (!downloadUrl.contains("/")) {
                 downloadLocation = rootDir.concat("\\").concat(tempLocation).concat("\\index.html");
             } else {
                 String aux = tempLocation.substring(0, tempLocation.indexOf("/"));
-                downloadLocation = tempLocation.replace(aux, rootDir);
+                downloadLocation = tempLocation.replaceFirst(aux, rootDir);
                 String fileName = tempLocation.substring(tempLocation.lastIndexOf('/') + 1, tempLocation.length());
                 if (!fileName.isEmpty()) {
                     if (fileName.lastIndexOf('.') < 0) {
                         downloadLocation = downloadLocation.concat(".html");
+                    }
+                    if (url.getHost().equalsIgnoreCase(fileName)) {
+                        downloadLocation = downloadLocation.concat("\\index.html");
                     }
                 } else {
                     downloadLocation = downloadLocation.concat("\\index.html");
@@ -107,6 +110,15 @@ public class FileDownloaderImpl implements FileDownloader {
                                 return null;
                             }
                         } else {
+                            fos.close();
+                            File downloadedFileParts = new File(p.toString());
+                            if (downloadedFileParts.delete()) {
+                                if (crawlerConfig.getLogLevel() >= 3) {
+                                    logger.info(String.format("Fisierul %s a fost sters pentru ca nu se afla in lista de fisiere acceptate", p.toString()));
+                                }
+                            } else {
+                                logger.severe(String.format("Fisierul % nu a putut fi sters!!", p.toString()));
+                            }
                             if (crawlerConfig.getLogLevel() >= 2) {
                                 logger.warning(String.format("Extensia pentru fisierul %s nu se afla in lista de fisiere admise", p.toString()));
                             }
